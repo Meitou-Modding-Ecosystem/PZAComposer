@@ -1,0 +1,6 @@
+# the Meitou release the fuzz harness builds against (machine-local)
+mod/local.props
+bin/
+obj/
+tests/out/
+mod/out/

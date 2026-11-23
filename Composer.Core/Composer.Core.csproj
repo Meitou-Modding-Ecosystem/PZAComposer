@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The Composer's core: the admission and pacing maths (docs/maths.md). No engine code:
+       the Meitou mod, the tests, the simulation and the balance runners all use it as it is. -->
+  <PropertyGroup>
+    <AssemblyName>PZA.Composer.Core</AssemblyName>
+    <RootNamespace>PZA.Composer</RootNamespace>
+  </PropertyGroup>
+</Project>

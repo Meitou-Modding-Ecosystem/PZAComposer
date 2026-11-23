@@ -1,0 +1,75 @@
+# PZA's Composer: known bugs the fuzz harness must catch (PZAMeitouUi\fuzz\mutate.py). Author: PZA. One block per mutant, verbatim.
+# Header: ID | file from the folder that holds the repos | fuzz targets to run | what it plants
+
+@@ CO-tmax | PZAComposer\Composer.Core\Composer.cs | composer.pacing | the total may pass TMax
+<<<
+        if (t + b.Intensity > s.TMax) return Verdict.Wait("too much going on", now + 1);
+===
+        if (t > s.TMax) return Verdict.Wait("too much going on", now + 1);
+>>>
+
+@@ CO-relief-total | PZAComposer\Composer.Core\Composer.cs | composer.pacing | relief caps each beat, not the total
+<<<
+                if (t + b.Intensity > DramaSettings.Quiet) return Verdict.Wait("relief: quiet now", NextPhaseAt(now));
+===
+                if (b.Intensity > DramaSettings.Quiet) return Verdict.Wait("relief: quiet now", NextPhaseAt(now));
+>>>
+
+# CO-build-peak (the "peak comes later" rule dropped) is an equivalent mutant: BuildTop = TMax - 0.75 Cap = PeakAt, so the ramp is under
+# PeakAt everywhere before the peak slot and already keeps every peak out. The ramp itself is planted instead.
+@@ CO-ramp | PZAComposer\Composer.Core\Composer.cs | composer.pacing | the build-up starts at its top (no ramp)
+<<<
+                if (t + b.Intensity > DramaSettings.Quiet + (s.BuildTop - DramaSettings.Quiet) * frac) return Verdict.Wait("build-up: too soon for that much", now + 1);
+===
+                if (t + b.Intensity > s.BuildTop) return Verdict.Wait("build-up: too soon for that much", now + 1);
+>>>
+
+@@ CO-one-peak | PZAComposer\Composer.Core\Composer.cs | composer.pacing | two peaks in one cycle
+<<<
+                if (peak && _peakCycle == cycle) return Verdict.Wait("one peak per cycle", NextPhaseAt(now));
+===
+                if (peak && _peakCycle == cycle + 1) return Verdict.Wait("one peak per cycle", NextPhaseAt(now));
+>>>
+
+@@ CO-last-arc | PZAComposer\Composer.Core\Composer.cs | composer.pacing | the last arc is not kept for the peak
+<<<
+        if (!peak && newArc && arcs >= MaxArcs - 1) return Verdict.Wait("the last arc is the peak's", now + 1);
+===
+        if (!peak && newArc && arcs >= MaxArcs) return Verdict.Wait("the last arc is the peak's", now + 1);
+>>>
+
+@@ CO-arcs | PZAComposer\Composer.Core\Composer.cs | composer.pacing,composer.carry | a fourth arc (a peak) is let in
+<<<
+        if (newArc && arcs >= MaxArcs) return Verdict.Wait("three arcs already", now + 1);
+===
+        if (newArc && arcs > MaxArcs) return Verdict.Wait("three arcs already", now + 1);
+>>>
+
+@@ CO-kind | PZAComposer\Composer.Core\Composer.cs | composer.pacing | the kind cooldown is half as long
+<<<
+        if (_kindShown.TryGetValue(b.Kind, out double k) && now - k < KindCooldownHours) return Verdict.Wait("kind cooling down", k + KindCooldownHours);
+===
+        if (_kindShown.TryGetValue(b.Kind, out double k) && now - k < KindCooldownHours / 2) return Verdict.Wait("kind cooling down", k + KindCooldownHours);
+>>>
+
+@@ CO-window | PZAComposer\Composer.Core\Composer.cs | composer.pacing | a beat goes after its window closed
+<<<
+        if (now > b.Latest) return Verdict.No("window passed: tell it as news");
+===
+        if (now > b.Latest + 6) return Verdict.No("window passed: tell it as news");
+>>>
+
+@@ CO-hostile | PZAComposer\Composer.Core\Composer.cs | composer.pacing | two hostile beats at once
+<<<
+            if (Gate == null && _active.Any(a => a.Beat.Hostile)) return Verdict.Wait("one hostile at a time", now + 1);
+===
+            if (Gate == null && _active.Count(a => a.Beat.Hostile) > 1) return Verdict.Wait("one hostile at a time", now + 1);
+>>>
+
+@@ CO-read-atomic | PZAComposer\Composer.Core\Composer.cs | composer.read | a damaged section moves the curve's origin
+<<<
+            long peakCycle = r.ReadInt64();
+===
+            Origin = origin;
+            long peakCycle = r.ReadInt64();
+>>>

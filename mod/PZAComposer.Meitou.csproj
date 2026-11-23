@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- PZA's Composer for Meitou: the code mod (author PZA, GPLv3 or later). The core (..\Composer.Core) is compiled in from source, so the
+       mod is one DLL. The game supplies every Meitou assembly at run time: referenced by path with Private="false", never copied into git or
+       the output. Override MeitouDir to build against another unpacked Meitou release. -->
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <AssemblyName>PZAComposer.Meitou</AssemblyName>
+    <RootNamespace>PZA.Composer.Meitou</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Version>0.2.0</Version>
+    <Authors>PZA</Authors>
+    <Company>PZA</Company>
+    <Product>PZA's Composer for Meitou</Product>
+    <Copyright>PZA, GPLv3 or later</Copyright>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <Deterministic>true</Deterministic>
+    <PathMap>$(MSBuildProjectDirectory)=PZAComposer/mod</PathMap>
+  </PropertyGroup>
+  <!-- Your unpacked Meitou release: -p:MeitouDir=..., or mod\local.props (git-ignored):
+       <Project><PropertyGroup><MeitouDir>C:\path\to\Meitou-0.20.1-win-x64</MeitouDir></PropertyGroup></Project> -->
+  <Import Project="$(MSBuildThisFileDirectory)local.props" Condition="'$(MeitouDir)' == '' And Exists('$(MSBuildThisFileDirectory)local.props')" />
+
+  <ItemGroup>
+    <Reference Include="MeitouClient"><HintPath>$(MeitouDir)\MeitouClient.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Meitou.Simulation"><HintPath>$(MeitouDir)\Meitou.Simulation.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Meitou.Core"><HintPath>$(MeitouDir)\Meitou.Core.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="out\**;bin\**;obj\**;tools\**" />
+    <None Remove="tools\**;out\**" />
+    <Compile Include="..\Composer.Core\*.cs" Link="Core\%(Filename)%(Extension)" />
+    <None Include="meitou.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="CheckMeitouDir" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('$(MeitouDir)\MeitouClient.dll')" Text="MeitouClient.dll not found in MeitouDir='$(MeitouDir)'. Pass -p:MeitouDir=..." />
+  </Target>
+</Project>

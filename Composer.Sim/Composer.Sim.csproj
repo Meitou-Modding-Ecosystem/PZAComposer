@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The Part 4 check, re-run on the C# core: 1,000 seeds x 30 days per drama setting, the same claims as tools/euler/admission_check.py. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>PZA.Composer.Sim</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup><ProjectReference Include="../Composer.Core/Composer.Core.csproj" /></ItemGroup>
+</Project>
